@@ -1,4 +1,4 @@
-package fr.faylixe.googlecodejam.client.application;
+package fr.faylixe.googlecodejam.cli;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

@@ -1,4 +1,4 @@
-package fr.faylixe.googlecodejam.client.application;
+package fr.faylixe.googlecodejam.cli;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,17 +21,17 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 
+import fr.faylixe.googlecodejam.cli.SeleniumCookieSupplier;
 import fr.faylixe.googlecodejam.client.CodeJamSession;
 import fr.faylixe.googlecodejam.client.Contest;
 import fr.faylixe.googlecodejam.client.Round;
 import fr.faylixe.googlecodejam.client.common.NamedObject;
 import fr.faylixe.googlecodejam.client.executor.HttpRequestExecutor;
 import fr.faylixe.googlecodejam.client.executor.Request;
-import fr.faylixe.googlecodejam.client.executor.SeleniumCookieSupplier;
 import fr.faylixe.googlecodejam.client.webservice.Problem;
 import fr.faylixe.googlecodejam.client.webservice.ProblemInput;
 import fr.faylixe.googlecodejam.client.webservice.SubmitResponse;
-import static fr.faylixe.googlecodejam.client.application.ApplicationConstant.*;
+import static fr.faylixe.googlecodejam.cli.ApplicationConstant.*;
 
 /**
  * <p>This class contains static method that are
