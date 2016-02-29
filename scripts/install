@@ -5,16 +5,16 @@ echo "# Google Code Jam Client installation script #"
 echo "##############################################"
 echo ""
 
-if [ -f "/usr/local/bin/googlecodejam-client.jar" ]
+if [ -f "/usr/local/bin/googlecodejam-cli.jar" ]
 then
-	echo "> Removing existing artifact /usr/local/bin/googlecodejam-client.jar"
-	rm /usr/local/bin/googlecodejam-client.jar
+	echo "> Removing existing artifact /usr/local/bin/googlecodejam-cli.jar"
+	rm /usr/local/bin/googlecodejam-cli.jar
 fi
 
 # Downloading latest version.
 echo "> Downloading released JAR archive from GitHub"
-curl -o /usr/local/bin/googlecodejam-client.jar -J -L --silent "https://github.com/Faylixe/googlecodejam-client/releases/download/v1.1.1/googlecodejam-client.jar" > /dev/null
-chmod o+rx /usr/local/bin/googlecodejam-client.jar
+curl -o /usr/local/bin/googlecodejam-cli.jar -J -L --silent "https://github.com/Faylixe/googlecodejam-cli/releases/download/v1.0.0/googlecodejam-cli.jar" > /dev/null
+chmod o+rx /usr/local/bin/googlecodejam-cli.jar
 
 # Install script.
 if [ -f "/usr/local/bin/codejam" ]
@@ -23,7 +23,7 @@ then
 	rm /usr/local/bin/codejam
 fi
 echo "> Downloading last script version from GitHub"
-curl -o /usr/local/bin/codejam -J -L --silent "https://raw.githubusercontent.com/Faylixe/googlecodejam-client/master/scripts/codejam" > /dev/null
+curl -o /usr/local/bin/codejam -J -L --silent "https://raw.githubusercontent.com/Faylixe/googlecodejam-cli/master/scripts/codejam" > /dev/null
 chmod o+rx /usr/local/bin/codejam
 
 echo ""
