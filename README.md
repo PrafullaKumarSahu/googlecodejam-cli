@@ -1,13 +1,11 @@
-# Google Code Jam - Client API
+# Google Code Jam - CLI
 
-[![Join the chat at https://gitter.im/Faylixe/googlecodejam-client](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Faylixe/googlecodejam-client?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/Faylixe/googlecodejam-cli.svg?branch=master)](https://travis-ci.org/Faylixe/googlecodejam-cli)[![Join the chat at https://gitter.im/Faylixe/googlecodejam-client](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Faylixe/googlecodejam-client?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Java client API for Google Code Jam contest. This API is implemented with, and for JDK8 and prior ([changelog](https://github.com/Faylixe/googlecodejam-client/blob/master/CHANGELOG.md)).
-
-[OSGi packaged version](https://github.com/Faylixe/googlecodejam-client-osgi) is also available.
+Command line application for managing Google Code Jam contest submission based on the [googlecodejam-client](https://github.com/Faylixe/googlecodejam-client) API.
 
 * [Disclaimer](#disclaimer)
-* [Command line application](#command-line-application)
+* [Usage](#usage)
   - [Installation](#installation)
   - [Initialization action](#initialization-action)
   - [Download action](#download-action)
@@ -19,7 +17,7 @@ Java client API for Google Code Jam contest. This API is implemented with, and f
 
 Please note that this client is not provided by Google. Any responsability is declined if a bug occurs when you are using it in a real contest condition. This API is fully working in a practice context, but has never been tested in a real contest.
 
-## Command line application
+## Usage
 
 A command line application which consists in the client JAR and a running script is also available. Here is the usage description :
 
@@ -40,7 +38,7 @@ Please note that Firefox web browser is also required.
 You can install script and packaged version of client by running the following command :
 
 ```bash
-wget -O - https://raw.githubusercontent.com/Faylixe/googlecodejam-client/master/scripts/install | bash
+wget -O - https://raw.githubusercontent.com/Faylixe/googlecodejam-cli/master/scripts/install | bash
 ```
 
 Once script has been executed, you can run the **codejam** command. Please note that installation script should be ran under root permission.
