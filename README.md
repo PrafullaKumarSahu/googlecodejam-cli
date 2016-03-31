@@ -43,6 +43,13 @@ wget -O - https://raw.githubusercontent.com/Faylixe/googlecodejam-cli/master/scr
 
 Once script has been executed, you can run the **codejam** command. Please note that installation script should be ran under root permission.
 
+If you are not comfortable with running script from an unknown source with root permission, you can just download the last released
+[jar file](https://github.com/Faylixe/googlecodejam-cli/releases), and run it using the command :
+
+```java
+java -classpath googlecodejam-cli.jar fr.faylixe.googlecodejam.cli.Application parameters
+```
+
 ### Initialization action
 
 This action is in charge of retrieving a **SACSID** cookie value which is mandatory for querying
