@@ -34,7 +34,7 @@ public final class Application {
 			final CommandLine command = parser.parse(options, args);
 			boolean success = false;
 			if (command.hasOption(ApplicationConstant.INIT)) {
-				success = ApplicationCommand.init();
+				success = ApplicationCommand.init(command);
 			}
 			else if (command.hasOption(ApplicationConstant.DOWNLOAD)) {
 				success = ApplicationCommand.download(command);

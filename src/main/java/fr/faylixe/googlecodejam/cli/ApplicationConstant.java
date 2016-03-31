@@ -22,6 +22,21 @@ public final class ApplicationConstant {
 	/** Description of the initialization action. **/
 	public static final String INIT_DESCRIPTION = "Initializes code jam context by logging user in, and selects an active contest and round.";
 
+	/** Short option for the initialization method. **/
+	public static final String INIT_METHOD = "m";
+
+	/** Long option for initialization method. **/
+	public static final String INIT_METHOD_LONG = "method";
+
+	/** Description of the method parameter. **/
+	public static final String INIT_METHOD_DESCRIPTION = "Specify the initialization method to use. Supported method are firefox, or text";
+
+	/** Parameter value for firefox initialization method. **/
+	public static final String FIREFOX_METHOD = "firefox";
+
+	/** Parameter value for text initialization method. **/
+	public static final String TEXT_METHOD = "text";
+
 	/** Short option for the download action. **/
 	public static final String DOWNLOAD = "d";
 
@@ -85,6 +100,7 @@ public final class ApplicationConstant {
 	public static Options createOptions() {
 		final Options options = new Options();
 		options.addOption(INIT, INIT_LONG, false, INIT_DESCRIPTION);
+		options.addOption(INIT_METHOD, INIT_METHOD_LONG, true, INIT_METHOD_DESCRIPTION);
 		options.addOption(DOWNLOAD, DOWNLOAD_LONG, false, DOWNLOAD_DESCRIPTION);
 		options.addOption(SUBMIT, SUBMIT_LONG, false, SUBMIT_DESCRIPTION);
 		options.addOption(PROBLEM, PROBLEM_LONG, true, PROBLEM_DESCRIPTION);

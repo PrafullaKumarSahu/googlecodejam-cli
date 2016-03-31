@@ -19,7 +19,7 @@ Please note that this client is not provided by Google. Any responsability is de
 
 ## Usage
 
-A command line application which consists in the client JAR and a running script is also available. Here is the usage description :
+This command line application consists in the client JAR and a running script is also available. Here is the usage description :
 
 ```bash
 codejam action parameter
@@ -45,13 +45,25 @@ Once script has been executed, you can run the **codejam** command. Please note 
 
 ### Initialization action
 
-This action does not take any parameters, and will open up a Firefox instance
+This action is in charge of retrieving a **SACSID** cookie value which is mandatory for querying
+Code Jam platform successfully. This cookie can be either retrieved using :
+
+* Firefox browser
+* Raw cookie input
+
+By default the Firefox method is used, which will open up a Firefox instance
 in order to authenticate to Google services. Once Firefox is opened and the login page loaded,
 please proceed to the authentication process, and when you will be logged and redirected
 to the code jam home page, Firefox will be closed automatically.
 
 ```bash
 codejam --init
+```
+
+If you want to directly supply the **SACSID** cookie value you can use the *--method* parameter : 
+
+```bash
+codejam --init --method text
 ```
 
 Once logged you will be prompted to choose a contest and a round. Those will become contextual round and session

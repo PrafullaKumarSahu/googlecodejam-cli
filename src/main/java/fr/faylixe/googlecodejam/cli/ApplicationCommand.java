@@ -12,12 +12,14 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.function.Supplier;
 
 import static java.lang.System.out;
 import static java.lang.System.err;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.SerializationUtils;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 
@@ -97,14 +99,37 @@ public final class ApplicationCommand {
 	}
 
 	/**
-	 * Methods that is bound to the INIT command. Starts
-	 * firefox through selenium to retrieve cookie instance
-	 * and prompts user for the contextual round to use.
+	 * Creates and saves a contextual session.
 	 * 
+	 * @param cookie Cookie value to use for initialization.
+	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
+	 * @throws IOException If any error occurs while saving contextual session.
+	 * @throws GeneralSecurityException If any error occurs while creating session.
+	 */
+	private static boolean init(final String cookie) throws IOException, GeneralSecurityException {
+		out.println("Cookie retrieved, extracting contest list.");
+		final Optional<Round> round = selectRound();
+		if (round.isPresent()) {
+			out.println("Writing " + COOKIE_PATH);
+			Files.write(Paths.get(COOKIE_PATH), cookie.getBytes());
+			out.println("Writing " + ROUND_PATH);
+			SerializationUtils.serialize(round.get(), new FileOutputStream(ROUND_PATH));
+			out.println("Initialization done, you can now download and submit in this directory.");
+			return true;
+		}
+		err.println("No round selected, abort.");
+		return false;
+	}
+
+	/**
+	 * Starts firefox through selenium to retrieve
+	 * cookie instance and process initialization.
+	 * 
+	 * @param driverSupplier Driver supplier to use.
 	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
 	 */
-	public static boolean init() {
-		out.println("Firefox browser will open, please authenticate to your Google account with it.");
+	private static boolean browserInit(final Supplier<WebDriver> driverSupplier) {
+		out.println("Web browser will open, please authenticate to your Google account with it.");
 		final SeleniumCookieSupplier supplier = new SeleniumCookieSupplier(Request.DEFAULT_HOSTNAME + "/codejam", FirefoxDriver::new);
 		try {
 			final String cookie = supplier.get();
@@ -112,24 +137,53 @@ public final class ApplicationCommand {
 				err.println("Retrieved cookie instance is null, abort.");
 			}
 			else {
-				out.println("Cookie retrieved, extracting contest list.");
-				final Optional<Round> round = selectRound();
-				if (round.isPresent()) {
-					out.println("Writing " + COOKIE_PATH);
-					SerializationUtils.serialize(cookie, new FileOutputStream(COOKIE_PATH));
-					out.println("Writing " + ROUND_PATH);
-					SerializationUtils.serialize(round.get(), new FileOutputStream(ROUND_PATH));
-					out.println("Initialization done, you can now download and submit in this directory.");
-				}
-				else {
-					err.println("No round selected, abort.");
-				}
+				return init(cookie);
 			}
 		}
 		catch (final IOException | UnreachableBrowserException | GeneralSecurityException e) {
 			err.println("An error occurs while creating CodeJamSession : " + e.getMessage());
 		}
-		return true;
+		return false;
+	}
+
+	/**
+	 * Initializes contextual session by asking user for SACSID cookie value.
+	 * 
+	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
+	 */
+	private static boolean textInit() {
+		out.println("Please enter the SACSID cookie value to use :");
+		final Scanner scanner = new Scanner(System.in);
+		final String cookie = scanner.next();
+		scanner.close();
+		try {
+			return init(cookie);
+		}
+		catch (final IOException | GeneralSecurityException e) {
+			err.println("An error occurs while creating CodeJamSession : " + e.getMessage());
+		}
+		return false;
+	}
+
+	/**
+	 * Methods that is bound to the INIT command. 
+	 * 
+	 * @param command Command to retrieve method parameters from.
+	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
+	 */
+	public static boolean init(final CommandLine command) {
+		if (command.hasOption(INIT_METHOD)) {
+			final String method = command.getOptionValue(INIT_METHOD).toLowerCase();
+			if (FIREFOX_METHOD.equals(method)) {
+				return browserInit(FirefoxDriver::new);
+			}
+			else if (TEXT_METHOD.equals(method)) {
+				return textInit();
+			}
+			err.println("Invalid method provided (only firefox or text supported");
+			return false;
+		}
+		return browserInit(FirefoxDriver::new);
 	}
 
 	/**
@@ -141,8 +195,11 @@ public final class ApplicationCommand {
 	 * @throws GeneralSecurityException 
 	 */
 	private static CodeJamSession getContextualSession() throws IOException, GeneralSecurityException {
-		final String cookie = (String) SerializationUtils.deserialize(new FileInputStream(COOKIE_PATH));
-		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.DEFAULT_HOSTNAME, cookie);
+		final List<String> cookie = Files.readAllLines(Paths.get(COOKIE_PATH));
+		if (cookie.isEmpty()) {
+			throw new IOException("Invalid cookie file");
+		}
+		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.DEFAULT_HOSTNAME, cookie.get(0));
 		final Round round = (Round) SerializationUtils.deserialize(new FileInputStream(ROUND_PATH));
 		return CodeJamSession.createSession(executor, round);
 	}
