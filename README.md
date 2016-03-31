@@ -47,7 +47,7 @@ If you are not comfortable with running script from an unknown source with root 
 [jar file](https://github.com/Faylixe/googlecodejam-cli/releases), and run it using the command :
 
 ```java
-java -classpath googlecodejam-cli.jar fr.faylixe.googlecodejam.cli.Application parameters
+java -jar googlecodejam-cli.jar action parameters
 ```
 
 ### Initialization action
