@@ -245,6 +245,9 @@ public final class ApplicationCommand {
 		try {
 			final CodeJamSession session = getContextualSession();
 			final ProblemInput input = getProblemInput(command, session);
+			if (input == null) {
+				return false;
+			}
 			final InputStream stream = session.download(input);
 			final Path target = Paths.get(session.buildFilename(input));
 			Files.deleteIfExists(target);
