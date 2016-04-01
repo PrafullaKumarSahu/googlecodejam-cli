@@ -46,6 +46,15 @@ public final class ApplicationConstant {
 	/** Description of the download action. **/
 	public static final String DOWNLOAD_DESCRIPTION = "Downloads an input file for a given problem and target dataset.";
 
+	/** Short option for the attempt parameter. **/
+	public static final String DOWNLOAD_ATTEMPT = "a";
+
+	/** Long option for the attempt parameter. **/
+	public static final String DOWNLOAD_ATTEMPT_LONG = "attempt";
+
+	/** Description of the attemp parameter. **/
+	public static final String DOWNLOAD_ATTEMPT_DESCRIPTION = "";
+
 	/** Short option for the submit action. **/
 	public static final String SUBMIT = "s";
 
@@ -100,10 +109,11 @@ public final class ApplicationConstant {
 	public static Options createOptions() {
 		final Options options = new Options();
 		options.addOption(INIT, INIT_LONG, false, INIT_DESCRIPTION);
-		options.addOption(INIT_METHOD, INIT_METHOD_LONG, true, INIT_METHOD_DESCRIPTION);
 		options.addOption(DOWNLOAD, DOWNLOAD_LONG, false, DOWNLOAD_DESCRIPTION);
 		options.addOption(SUBMIT, SUBMIT_LONG, false, SUBMIT_DESCRIPTION);
 		options.addOption(PROBLEM, PROBLEM_LONG, true, PROBLEM_DESCRIPTION);
+		options.addOption(INIT_METHOD, INIT_METHOD_LONG, true, INIT_METHOD_DESCRIPTION);
+		options.addOption(DOWNLOAD_ATTEMPT, DOWNLOAD_ATTEMPT_LONG, true, DOWNLOAD_ATTEMPT_DESCRIPTION);
 		options.addOption(INPUT_TYPE, INPUT_TYPE_LONG, true, INPUT_TYPE_DESCRIPTION);
 		options.addOption(OUTPUT, OUTPUT_LONG, true, OUTPUT_DESCRIPTION);
 		options.addOption(SOURCE, SOURCE_LONG, true, SOURCE_DESCRIPTION);

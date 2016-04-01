@@ -111,7 +111,7 @@ public final class ApplicationCommand {
 		final Optional<Round> round = selectRound();
 		if (round.isPresent()) {
 			out.println("Writing " + COOKIE_PATH);
-			Files.write(Paths.get(COOKIE_PATH), cookie.getBytes());
+			SerializationUtils.serialize(cookie, new FileOutputStream(COOKIE_PATH));
 			out.println("Writing " + ROUND_PATH);
 			SerializationUtils.serialize(round.get(), new FileOutputStream(ROUND_PATH));
 			out.println("Initialization done, you can now download and submit in this directory.");
@@ -195,12 +195,15 @@ public final class ApplicationCommand {
 	 * @throws GeneralSecurityException 
 	 */
 	private static CodeJamSession getContextualSession() throws IOException, GeneralSecurityException {
-		final List<String> cookie = Files.readAllLines(Paths.get(COOKIE_PATH));
-		if (cookie.isEmpty()) {
-			throw new IOException("Invalid cookie file");
+		final String cookie = (String) SerializationUtils.deserialize(new FileInputStream(COOKIE_PATH));
+		if (cookie == null) {
+			throw new IOException("Invalid cookie file, please initialize directory again.");
 		}
-		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.DEFAULT_HOSTNAME, cookie.get(0));
+		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.DEFAULT_HOSTNAME, cookie);
 		final Round round = (Round) SerializationUtils.deserialize(new FileInputStream(ROUND_PATH));
+		if (round == null) {
+			throw new IOException("Contextual session is broken, please initialize directory again.");
+		}
 		return CodeJamSession.createSession(executor, round);
 	}
 
