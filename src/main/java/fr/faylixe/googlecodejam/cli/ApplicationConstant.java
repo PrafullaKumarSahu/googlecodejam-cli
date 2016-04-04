@@ -53,7 +53,7 @@ public final class ApplicationConstant {
 	public static final String DOWNLOAD_ATTEMPT_LONG = "attempt";
 
 	/** Description of the attemp parameter. **/
-	public static final String DOWNLOAD_ATTEMPT_DESCRIPTION = "";
+	public static final String DOWNLOAD_ATTEMPT_DESCRIPTION = "Attempt number to use for the download action";
 
 	/** Short option for the submit action. **/
 	public static final String SUBMIT = "s";

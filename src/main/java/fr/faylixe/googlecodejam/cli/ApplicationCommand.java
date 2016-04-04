@@ -251,8 +251,10 @@ public final class ApplicationCommand {
 			if (input == null) {
 				return false;
 			}
-			final InputStream stream = session.download(input);
-			final Path target = Paths.get(session.buildFilename(input));
+			final String rawAttempt = command.getOptionValue(DOWNLOAD_ATTEMPT);
+			final int attempt = (rawAttempt == null ? 0 : Integer.valueOf(rawAttempt));
+			final InputStream stream = session.download(input, attempt);
+			final Path target = Paths.get(session.buildFilename(input, attempt));
 			Files.deleteIfExists(target);
 			Files.copy(stream, target);
 			out.println(target.toString());
