@@ -80,11 +80,12 @@ action, it will use the created contextual logged session and round.
 Although you can also specify a round directly using the *--contest* parameter. It takes in argument the round dashboard id
 that you can find in your dashboard URL like following :
 
+![dashboard url](https://raw.githubusercontent.com/Faylixe/googlecodejam-cli/master/dashboardurl.png)
+
 For this URL, the corresponding command would be :
 
-![dashboard url]()
 ```bash
-codejam --init --contest 
+codejam --init --contest 6224486
 ```
 
 This would be particulary helpful during real contest where the round is not indexed.
