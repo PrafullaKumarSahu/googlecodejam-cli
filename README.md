@@ -116,6 +116,10 @@ to send either the output file as the source file of your algorithm as well.
 codejam --submit --problem A --inputtype small --output path/to/output --sourcefile path/to/sourcefile
 ```
 
+## Issues
+
+Please do not hesitate to report any bug [here](https://github.com/Faylixe/googlecodejam-cli/issues). For each issue please deliver the output of the command you ran using the *--verbose* option.
+
 ## Jammy
 
 Want more than a command line application ? Take a look at the [Jammy](http://faylixe.fr/jammy) project, which provides a dedicated development perspective
