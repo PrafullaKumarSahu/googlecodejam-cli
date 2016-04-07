@@ -107,6 +107,9 @@ If the download is successful, the name of the downloaded file will be printed, 
 ```bash
 cat < `codejam --download --problem A --inputtype small` | python A.py
 ```
+
+Please note that for problem with two small dataset, the dataset name would be **small1** and **small2**
+
 ### Submit action
 
 Once input file is downloaded, and algorithm solved all test cases, *submit* action could be used in order
