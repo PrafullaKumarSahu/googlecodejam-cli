@@ -15,6 +15,19 @@ import org.apache.commons.cli.ParseException;
 public final class Application {
 
 	/**
+	 * 
+	 */
+	private static boolean verbose;
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static boolean isVerbose() {
+		return verbose;
+	}
+
+	/**
 	 * Private constructor for avoiding instantiation.
 	 */
 	private Application() {
@@ -32,6 +45,7 @@ public final class Application {
 		final CommandLineParser parser = new DefaultParser();
 		try {
 			final CommandLine command = parser.parse(options, args);
+			verbose = command.hasOption(ApplicationConstant.VERBOSE);
 			boolean success = false;
 			if (command.hasOption(ApplicationConstant.INIT)) {
 				success = ApplicationCommand.init(command);

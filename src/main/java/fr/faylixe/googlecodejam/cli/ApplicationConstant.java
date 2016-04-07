@@ -109,6 +109,15 @@ public final class ApplicationConstant {
 	/** Description of the source parameter. **/
 	public static final String SOURCE_DESCRIPTION = "This parameter specifies the source file to upload.";
 
+	/** Short option for the verbose mode. **/
+	public static final String VERBOSE = "v";
+
+	/** Long option for the verbose mode.**/
+	public static final String VERBOSE_LONG = "verbose";
+
+	/** Description for the verbose mode. **/
+	public static final String VERBOSE_DESCRIPTION = "Verbose mode for debugging purpose only";
+
 	/**
 	 * Static factory method that creates the {@link Options} list
 	 * for the command line arguments parsing.
@@ -127,6 +136,7 @@ public final class ApplicationConstant {
 		options.addOption(INPUT_TYPE, INPUT_TYPE_LONG, true, INPUT_TYPE_DESCRIPTION);
 		options.addOption(OUTPUT, OUTPUT_LONG, true, OUTPUT_DESCRIPTION);
 		options.addOption(SOURCE, SOURCE_LONG, true, SOURCE_DESCRIPTION);
+		options.addOption(VERBOSE, VERBOSE_LONG, false, VERBOSE_DESCRIPTION);
 		return options;
 	}
 

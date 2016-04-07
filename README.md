@@ -15,7 +15,7 @@ Command line application for managing Google Code Jam contest submission based o
 
 ## Disclaimer
 
-Please note that this client is not provided by Google. Any responsability is declined if a bug occurs when you are using it in a real contest condition. This API is fully working in a practice context, but has never been tested in a real contest.
+Please note that this client is not provided by Google. Any responsability is declined if a bug occurs when you are using it in a real contest condition.
 
 ## Usage
 
@@ -76,6 +76,18 @@ codejam --init --method text
 Once logged you will be prompted to choose a contest and a round. Those will become contextual round and session
 for the current directory you are running the script in, meaning that if you run another time the script with another
 action, it will use the created contextual logged session and round.
+
+Although you can also specify a round directly using the *--contest* parameter. It takes in argument the round dashboard id
+that you can find in your dashboard URL like following :
+
+For this URL, the corresponding command would be :
+
+![dashboard url]()
+```bash
+codejam --init --contest 
+```
+
+This would be particulary helpful during real contest where the round is not indexed.
 
 ### Download action
 
