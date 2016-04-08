@@ -110,6 +110,14 @@ cat < `codejam --download --problem A --inputtype small` | python A.py
 
 Please note that for problem with two small dataset, the dataset name would be **small1** and **small2**
 
+Plus, if you have to download several time the same input file (because you have failed a submission for example), you can specify an optional parameter *--attempt* which takes a integer as argument. It will save the file with a different suffix. The following command :
+
+```bash
+codejam --download --problem A --inputtype small --attempt 1
+```
+
+will save the input file using **A-small-1.in** as filename.
+
 ### Submit action
 
 Once input file is downloaded, and algorithm solved all test cases, *submit* action could be used in order
