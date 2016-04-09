@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Faylixe/googlecodejam-cli.svg?branch=master)](https://travis-ci.org/Faylixe/googlecodejam-cli) [![Join the chat at https://gitter.im/Faylixe/googlecodejam-client](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Faylixe/googlecodejam-client?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Command line application for managing Google Code Jam contest submission based on the [googlecodejam-client](https://github.com/Faylixe/googlecodejam-client) API. It requires Java 8 and prior.
+Command line application for managing Google Code Jam contest submission based on the [googlecodejam-client](https://github.com/Faylixe/googlecodejam-client) API. It requires Java 8.
 
 * [Disclaimer](#disclaimer)
 * [Usage](#usage)
