@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Faylixe/googlecodejam-cli.svg?branch=master)](https://travis-ci.org/Faylixe/googlecodejam-cli) [![Join the chat at https://gitter.im/Faylixe/googlecodejam-client](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Faylixe/googlecodejam-client?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Command line application for managing Google Code Jam contest submission based on the [googlecodejam-client](https://github.com/Faylixe/googlecodejam-client) API.
+Command line application for managing Google Code Jam contest submission based on the [googlecodejam-client](https://github.com/Faylixe/googlecodejam-client) API. It requires Java 8.
 
 * [Disclaimer](#disclaimer)
 * [Usage](#usage)
@@ -109,6 +109,14 @@ cat < `codejam --download --problem A --inputtype small` | python A.py
 ```
 
 Please note that for problem with two small dataset, the dataset name would be **small1** and **small2**
+
+Plus, if you have to download several time the same input file (because you have failed a submission for example), you can specify an optional parameter *--attempt* which takes an integer as argument. It will save the file with a different suffix. The following command :
+
+```bash
+codejam --download --problem A --inputtype small --attempt 1
+```
+
+will save the input file using **A-small-1.in** as filename.
 
 ### Submit action
 
