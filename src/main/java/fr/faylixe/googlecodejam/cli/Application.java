@@ -15,13 +15,15 @@ import org.apache.commons.cli.ParseException;
 public final class Application {
 
 	/**
-	 * 
+	 * Static flag that indicates if
+	 * verbose mode if activated or not.
 	 */
 	private static boolean verbose;
 
 	/**
+	 * Indicates if this execution is in verbose mode.
 	 * 
-	 * @return
+	 * @return <tt>true</tt> if execution should be verbose, <tt>false</tt> otherwise.
 	 */
 	public static boolean isVerbose() {
 		return verbose;
@@ -46,23 +48,27 @@ public final class Application {
 		try {
 			final CommandLine command = parser.parse(options, args);
 			verbose = command.hasOption(ApplicationConstant.VERBOSE);
-			boolean success = false;
+			CommandStatus status = CommandStatus.INVALID_FORMAT;
 			if (command.hasOption(ApplicationConstant.INIT)) {
-				success = ApplicationCommand.init(command);
+				status = ApplicationCommand.init(command);
 			}
 			else if (command.hasOption(ApplicationConstant.DOWNLOAD)) {
-				success = ApplicationCommand.download(command);
+				status = ApplicationCommand.download(command);
 			}
 			else if (command.hasOption(ApplicationConstant.SUBMIT)) {
-				success = ApplicationCommand.submit(command);
+				status = ApplicationCommand.submit(command);
 			}
-			if (!success) {
-				formatter.printHelp(ApplicationConstant.SYNTAX, options);
+			if (CommandStatus.INVALID_FORMAT.equals(status)) {
+				formatter.printHelp(ApplicationConstant.SYNTAX, options);				
+			}
+			if (!CommandStatus.SUCCESS.equals(status)) {
+				System.exit(-1);
 			}
 		}
 		catch (final ParseException e) {
 			System.out.println("An error occurs while parsing command line arguments : " + e.getMessage());
 			formatter.printHelp(ApplicationConstant.SYNTAX, options);
+			System.exit(-1);
 		}
 	}
 
