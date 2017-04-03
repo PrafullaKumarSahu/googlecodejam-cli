@@ -5,6 +5,19 @@ echo "# Google Code Jam Client installation script #"
 echo "##############################################"
 echo ""
 
+# Install geckodriver.
+if [ -f "/usr/local/bin/geckodriver" ]
+then
+	echo "> Removing existing Gecko driver"
+	rm /usr/local/bin/geckodriver
+fi
+echo "> Downloading Geckodriver"
+curl -o /usr/local/bin/geckodriver -J -L --silent "https://raw.githubusercontent.com/Faylixe/googlecodejam-cli/master/geckodriver" > /dev/null
+chmod o+rx /usr/local/bin/geckodriver
+
+echo ""
+echo "Installation complete, you can now run the 'codejam' command"
+
 if [ -f "/usr/local/bin/googlecodejam-cli.jar" ]
 then
 	echo "> Removing existing artifact /usr/local/bin/googlecodejam-cli.jar"
@@ -13,7 +26,7 @@ fi
 
 # Downloading latest version.
 echo "> Downloading released JAR archive from GitHub"
-curl -o /usr/local/bin/googlecodejam-cli.jar -J -L --silent "https://github.com/Faylixe/googlecodejam-cli/releases/download/v1.3.2/googlecodejam-cli.jar" > /dev/null
+curl -o /usr/local/bin/googlecodejam-cli.jar -J -L --silent "https://github.com/Faylixe/googlecodejam-cli/releases/download/v1.3.3/googlecodejam-cli.jar" > /dev/null
 chmod o+rx /usr/local/bin/googlecodejam-cli.jar
 
 # Install script.

@@ -55,7 +55,7 @@ public final class SeleniumCookieSupplier implements Supplier<String> {
 	 */
 	public SeleniumCookieSupplier(final String target, final Supplier<WebDriver> driverSupplier) {
 		this.lock = new Object();
-		this.target = target;
+		this.target = target.replaceAll("/$", "");
 		this.driverSupplier = driverSupplier;
 	}
 
@@ -118,7 +118,7 @@ public final class SeleniumCookieSupplier implements Supplier<String> {
 	 * @param driver Driver to check state from.
 	 */
 	public void checkCurrentState(final WebDriver driver) {
-		final String url = driver.getCurrentUrl();
+		final String url = driver.getCurrentUrl().replaceAll("/$", "");
 		if (target.equals(url)) {
 			result = driver.manage().getCookieNamed(COOKIE_NAME);
 			running = false;

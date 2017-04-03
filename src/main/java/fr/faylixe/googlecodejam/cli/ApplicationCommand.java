@@ -50,6 +50,12 @@ public final class ApplicationCommand {
 	/** Path of the serialized cookie file to use. **/
 	private static final String COOKIE_PATH = ".cjs-cookie";
 
+	/** Driver key. **/
+	private static final String WEBDRIVER_KEY = "webdriver.gecko.driver";
+
+	/** Path of default gecko driver location. **/
+	private static final String WEBDRIVER_PATH = "/usr/local/bin/geckodriver";
+
 	/**
 	 * Prompts users for selecting a valid {@link Round}
 	 * instance that will be used as a contextual round.
@@ -143,6 +149,7 @@ public final class ApplicationCommand {
 	 */
 	private static CommandStatus browserInit(final Supplier<WebDriver> driverSupplier, final String contest) {
 		out.println("[Initialization] Web browser will open, please authenticate to your Google account with it.");
+		System.setProperty(WEBDRIVER_KEY, WEBDRIVER_PATH);
 		final SeleniumCookieSupplier supplier = new SeleniumCookieSupplier(Request.getHostname() + "/codejam", FirefoxDriver::new);
 		try {
 			final String cookie = supplier.get();
