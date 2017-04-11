@@ -5,16 +5,6 @@ echo "# Google Code Jam Client installation script #"
 echo "##############################################"
 echo ""
 
-# Install geckodriver.
-if [ -f "/usr/local/bin/geckodriver" ]
-then
-	echo "> Removing existing Gecko driver"
-	rm /usr/local/bin/geckodriver
-fi
-echo "> Downloading Geckodriver"
-curl -o /usr/local/bin/geckodriver -J -L --silent "https://raw.githubusercontent.com/Faylixe/googlecodejam-cli/master/geckodriver" > /dev/null
-chmod o+rx /usr/local/bin/geckodriver
-
 echo ""
 echo "Installation complete, you can now run the 'codejam' command"
 

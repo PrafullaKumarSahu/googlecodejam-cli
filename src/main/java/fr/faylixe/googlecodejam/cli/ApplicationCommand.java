@@ -1,5 +1,7 @@
 package fr.faylixe.googlecodejam.cli;
 
+import io.github.bonigarcia.wdm.FirefoxDriverManager;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,6 +21,10 @@ import static java.lang.System.err;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.SerializationUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.UnreachableBrowserException;
@@ -27,6 +33,7 @@ import fr.faylixe.googlecodejam.cli.SeleniumCookieSupplier;
 import fr.faylixe.googlecodejam.client.CodeJamSession;
 import fr.faylixe.googlecodejam.client.Contest;
 import fr.faylixe.googlecodejam.client.Round;
+import fr.faylixe.googlecodejam.client.common.HTMLConstant;
 import fr.faylixe.googlecodejam.client.common.NamedObject;
 import fr.faylixe.googlecodejam.client.executor.HttpRequestExecutor;
 import fr.faylixe.googlecodejam.client.executor.Request;
@@ -50,11 +57,20 @@ public final class ApplicationCommand {
 	/** Path of the serialized cookie file to use. **/
 	private static final String COOKIE_PATH = ".cjs-cookie";
 
-	/** Driver key. **/
-	private static final String WEBDRIVER_KEY = "webdriver.gecko.driver";
+	/** Path for input directory. **/
+	private static final String INPUT_DIRECTORY = "input";
 
-	/** Path of default gecko driver location. **/
-	private static final String WEBDRIVER_PATH = "/usr/local/bin/geckodriver";
+	/** Path for output directory. **/
+	private static final String OUTPUT_DIRECTORY = "output";
+
+	/** Classname of the DIV that contains our testing dataset. **/
+	private static final String IO_CLASSNAME = "problem-io-wrapper";
+
+	/** Number of row used for dataset extraction. **/
+	private static final int DATASET_ROW = 2;
+
+	/** File extension for sample dataset. **/
+	private static final String TEST_EXTENSION = ".test";
 
 	/**
 	 * Prompts users for selecting a valid {@link Round}
@@ -132,11 +148,54 @@ public final class ApplicationCommand {
 			SerializationUtils.serialize(cookie, new FileOutputStream(COOKIE_PATH));
 			out.println("[Initialization] Writing " + ROUND_PATH);
 			SerializationUtils.serialize(round.get(), new FileOutputStream(ROUND_PATH));
+			out.println("[Initialization] Creating input directory");
+			Files.createDirectories(Paths.get(INPUT_DIRECTORY));
+			out.println("[Initialization] Creating output directory");
+			Files.createDirectories(Paths.get(OUTPUT_DIRECTORY));
+			out.println("[Initialization] Generating sample dataset");
+			final CodeJamSession session = getContextualSession();
+			final List<Problem> problems = session
+					.getContestInfo()
+					.getProblems();
+			for (int i = 0; i < problems.size(); i++) {
+				extractDataset(problems.get(i), i);
+			}
 			out.println("[Initialization] Initialization done, you can now download and submit in this directory.");
 			return CommandStatus.SUCCESS;
 		}
 		err.println("-> No round selected, abort.");
 		return CommandStatus.FAILED;
+	}
+
+	/**
+	 * Extracts and creates sample dataset from the given <tt>problem</tt>.
+	 * 
+	 * @param problem Problem to create sample dataset for.
+	 * @throws IOException If any error occurs while creating sample dataset.
+	 */
+	private static void extractDataset(final Problem problem, final int id) throws IOException {
+		final Document document = (Document) Jsoup.parse(problem.getBody());
+		final Elements problemIO = document.getElementsByClass(IO_CLASSNAME);
+		if (!problemIO.isEmpty()) {
+			final Elements row = problemIO.first().getElementsByTag(HTMLConstant.TR);
+			if (row.size() >= DATASET_ROW) {
+				final Element dataset = row.get(1);
+				final Elements io = dataset.getElementsByTag(HTMLConstant.TD);
+				if (io.size() >= DATASET_ROW) {
+					final char problemIdentifier = (char)('A' + id);
+					final String path = new StringBuilder()
+						.append(problemIdentifier)
+						.append(TEST_EXTENSION)
+						.toString();
+					Files.write(
+							Paths.get(INPUT_DIRECTORY).resolve(path),
+							io.first().text().getBytes());
+					Files.write(
+							Paths.get(OUTPUT_DIRECTORY).resolve(path),
+							io.get(1).text().getBytes());
+				}
+			}
+		}
 	}
 
 	/**
@@ -149,7 +208,7 @@ public final class ApplicationCommand {
 	 */
 	private static CommandStatus browserInit(final Supplier<WebDriver> driverSupplier, final String contest) {
 		out.println("[Initialization] Web browser will open, please authenticate to your Google account with it.");
-		System.setProperty(WEBDRIVER_KEY, WEBDRIVER_PATH);
+		FirefoxDriverManager.getInstance().setup();
 		final SeleniumCookieSupplier supplier = new SeleniumCookieSupplier(Request.getHostname() + "/codejam", FirefoxDriver::new);
 		try {
 			final String cookie = supplier.get();

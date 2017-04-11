@@ -68,6 +68,12 @@
 			<version>3.3.1</version>
 		</dependency>
 		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>1.6.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>fr.faylixe</groupId>
 			<artifactId>googlecodejam-client</artifactId>
 			<version>1.4.10</version>
