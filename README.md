@@ -90,6 +90,16 @@ codejam --init --contest 6224486
 
 This would be particulary helpful during real contest where the round is not indexed.
 
+#### Dataset extraction.
+
+Since **1.4.0**, this tools will create an ``input`` and ``output`` directory in the current working directory,
+and create sample dataset files extracted from each problem description. This will allow you to test your solution
+quickly, as in the following example :
+
+```bash
+diff output/A.test <(python A.py < input/A.test)
+```
+
 ### Download action
 
 As it name suggests, the *download* action allows logged user to download an input file for a given problem.
