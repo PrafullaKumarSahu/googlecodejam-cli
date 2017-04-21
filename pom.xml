@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.faylixe</groupId>
 	<artifactId>googlecodejam-cli</artifactId>
-	<version>1.4.0</version>
+	<version>1.4.1</version>
 	<name>GoogleCodeJam command line interface</name>
 	<description>Command line client for Google Code Jam contest</description>
 	<url>https://github.com/Faylixe/googlecodejam-cli</url>
@@ -86,7 +86,7 @@
 		<dependency>
 			<groupId>fr.faylixe</groupId>
 			<artifactId>googlecodejam-client</artifactId>
-			<version>1.4.10</version>
+			<version>1.4.11</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
