@@ -13,6 +13,15 @@ public final class ApplicationConstant {
 	/** Syntax of the command line script. **/
 	public static final String SYNTAX = "codejamclient.sh action parameter";
 
+	/** Short option for the contest parameter. **/
+	public static final String CONTEST = "c";
+
+	/** Long option for the contest parameter. **/
+	public static final String CONTEST_LONG = "contest";
+
+	/** Description for the contest parameter. **/
+	public static final String CONTEST_DESCRIPTION = "Id of the target contest to work with.";
+
 	/** Short option for the initialization action. **/
 	public static final String INIT = "i";
 
@@ -100,6 +109,15 @@ public final class ApplicationConstant {
 	/** Description of the source parameter. **/
 	public static final String SOURCE_DESCRIPTION = "This parameter specifies the source file to upload.";
 
+	/** Short option for the verbose mode. **/
+	public static final String VERBOSE = "v";
+
+	/** Long option for the verbose mode.**/
+	public static final String VERBOSE_LONG = "verbose";
+
+	/** Description for the verbose mode. **/
+	public static final String VERBOSE_DESCRIPTION = "Verbose mode for debugging purpose only";
+
 	/**
 	 * Static factory method that creates the {@link Options} list
 	 * for the command line arguments parsing.
@@ -113,10 +131,12 @@ public final class ApplicationConstant {
 		options.addOption(SUBMIT, SUBMIT_LONG, false, SUBMIT_DESCRIPTION);
 		options.addOption(PROBLEM, PROBLEM_LONG, true, PROBLEM_DESCRIPTION);
 		options.addOption(INIT_METHOD, INIT_METHOD_LONG, true, INIT_METHOD_DESCRIPTION);
+		options.addOption(CONTEST, CONTEST_LONG, true, CONTEST_DESCRIPTION);
 		options.addOption(DOWNLOAD_ATTEMPT, DOWNLOAD_ATTEMPT_LONG, true, DOWNLOAD_ATTEMPT_DESCRIPTION);
 		options.addOption(INPUT_TYPE, INPUT_TYPE_LONG, true, INPUT_TYPE_DESCRIPTION);
 		options.addOption(OUTPUT, OUTPUT_LONG, true, OUTPUT_DESCRIPTION);
 		options.addOption(SOURCE, SOURCE_LONG, true, SOURCE_DESCRIPTION);
+		options.addOption(VERBOSE, VERBOSE_LONG, false, VERBOSE_DESCRIPTION);
 		return options;
 	}
 

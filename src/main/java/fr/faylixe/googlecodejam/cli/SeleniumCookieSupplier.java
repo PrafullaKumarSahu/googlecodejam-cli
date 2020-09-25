@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
+import fr.faylixe.googlecodejam.client.executor.Request;
+
 /**
  * TODO Javadoc
  * TODO Cookie expiration parsing
@@ -19,7 +21,7 @@ public final class SeleniumCookieSupplier implements Supplier<String> {
 	private static final String COOKIE_NAME = "SACSID";
 
 	/** Initial login URL to navigate to with web driver. **/
-	private static final String LOGIN_URL = "https://www.google.com/accounts/ServiceLogin?service=ah&passive=true&continue=https://appengine.google.com/_ah/conflogin%3Fcontinue%3Dhttps://code.google.com/codejam&ltmpl=";
+	private static final String LOGIN_URL = "https://www.google.com/accounts/ServiceLogin?service=ah&passive=true&continue=https://appengine.google.com/_ah/conflogin%3Fcontinue%3D";
 
 	/** Default waiting time between cookie check. **/
 	private static final long WAITING_TIME = 2000;
@@ -53,7 +55,7 @@ public final class SeleniumCookieSupplier implements Supplier<String> {
 	 */
 	public SeleniumCookieSupplier(final String target, final Supplier<WebDriver> driverSupplier) {
 		this.lock = new Object();
-		this.target = target;
+		this.target = target.replaceAll("/$", "");
 		this.driverSupplier = driverSupplier;
 	}
 
@@ -62,7 +64,12 @@ public final class SeleniumCookieSupplier implements Supplier<String> {
 	public String get() {
 		System.setProperty(LOGGING_PROPERTY, LOGGING_VALUE);
 		final WebDriver driver = driverSupplier.get();
-		driver.navigate().to(LOGIN_URL);
+		final StringBuilder builder = new StringBuilder();
+		builder
+			.append(LOGIN_URL)
+			.append(Request.getHostname())
+			.append("/codejam");
+		driver.navigate().to(builder.toString());
 		running = true;
 		waitForCookie(driver);
 		return result == null ? null : result.getValue();
@@ -111,7 +118,7 @@ public final class SeleniumCookieSupplier implements Supplier<String> {
 	 * @param driver Driver to check state from.
 	 */
 	public void checkCurrentState(final WebDriver driver) {
-		final String url = driver.getCurrentUrl();
+		final String url = driver.getCurrentUrl().replaceAll("/$", "");
 		if (target.equals(url)) {
 			result = driver.manage().getCookieNamed(COOKIE_NAME);
 			running = false;

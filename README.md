@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Faylixe/googlecodejam-cli.svg?branch=master)](https://travis-ci.org/Faylixe/googlecodejam-cli) [![Join the chat at https://gitter.im/Faylixe/googlecodejam-client](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Faylixe/googlecodejam-client?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Command line application for managing Google Code Jam contest submission based on the [googlecodejam-client](https://github.com/Faylixe/googlecodejam-client) API.
+Command line application for managing Google Code Jam contest submission based on the [googlecodejam-client](https://github.com/Faylixe/googlecodejam-client) API. It requires Java 8.
 
 * [Disclaimer](#disclaimer)
 * [Usage](#usage)
@@ -15,7 +15,7 @@ Command line application for managing Google Code Jam contest submission based o
 
 ## Disclaimer
 
-Please note that this client is not provided by Google. Any responsability is declined if a bug occurs when you are using it in a real contest condition. This API is fully working in a practice context, but has never been tested in a real contest.
+Please note that this client is not provided by Google. Any responsability is declined if a bug occurs when you are using it in a real contest condition.
 
 ## Usage
 
@@ -77,6 +77,29 @@ Once logged you will be prompted to choose a contest and a round. Those will bec
 for the current directory you are running the script in, meaning that if you run another time the script with another
 action, it will use the created contextual logged session and round.
 
+Although you can also specify a round directly using the *--contest* parameter. It takes in argument the round dashboard id
+that you can find in your dashboard URL like following :
+
+![dashboard url](https://raw.githubusercontent.com/Faylixe/googlecodejam-cli/master/dashboardurl.png)
+
+For this URL, the corresponding command would be :
+
+```bash
+codejam --init --contest 6224486
+```
+
+This would be particulary helpful during real contest where the round is not indexed.
+
+#### Dataset extraction.
+
+Since **1.4.0**, this tools will create an ``input`` and ``output`` directory in the current working directory,
+and create sample dataset files extracted from each problem description. This will allow you to test your solution
+quickly, as in the following example :
+
+```bash
+diff output/A.test <(python A.py < input/A.test)
+```
+
 ### Download action
 
 As it name suggests, the *download* action allows logged user to download an input file for a given problem.
@@ -94,6 +117,17 @@ If the download is successful, the name of the downloaded file will be printed, 
 ```bash
 cat < `codejam --download --problem A --inputtype small` | python A.py
 ```
+
+Please note that for problem with two small dataset, the dataset name would be **small1** and **small2**
+
+Plus, if you have to download several time the same input file (because you have failed a submission for example), you can specify an optional parameter *--attempt* which takes an integer as argument. It will save the file with a different suffix. The following command :
+
+```bash
+codejam --download --problem A --inputtype small --attempt 1
+```
+
+will save the input file using **A-small-1.in** as filename.
+
 ### Submit action
 
 Once input file is downloaded, and algorithm solved all test cases, *submit* action could be used in order
@@ -102,6 +136,10 @@ to send either the output file as the source file of your algorithm as well.
 ```bash
 codejam --submit --problem A --inputtype small --output path/to/output --sourcefile path/to/sourcefile
 ```
+
+## Issues
+
+Please do not hesitate to report any bug [here](https://github.com/Faylixe/googlecodejam-cli/issues). For each issue please deliver the output of the command you ran using the *--verbose* option.
 
 ## Jammy
 

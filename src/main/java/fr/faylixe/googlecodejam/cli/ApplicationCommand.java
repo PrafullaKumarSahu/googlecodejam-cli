@@ -1,5 +1,7 @@
 package fr.faylixe.googlecodejam.cli;
 
+import io.github.bonigarcia.wdm.FirefoxDriverManager;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,6 +21,10 @@ import static java.lang.System.err;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.SerializationUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.UnreachableBrowserException;
@@ -27,6 +33,7 @@ import fr.faylixe.googlecodejam.cli.SeleniumCookieSupplier;
 import fr.faylixe.googlecodejam.client.CodeJamSession;
 import fr.faylixe.googlecodejam.client.Contest;
 import fr.faylixe.googlecodejam.client.Round;
+import fr.faylixe.googlecodejam.client.common.HTMLConstant;
 import fr.faylixe.googlecodejam.client.common.NamedObject;
 import fr.faylixe.googlecodejam.client.executor.HttpRequestExecutor;
 import fr.faylixe.googlecodejam.client.executor.Request;
@@ -50,15 +57,38 @@ public final class ApplicationCommand {
 	/** Path of the serialized cookie file to use. **/
 	private static final String COOKIE_PATH = ".cjs-cookie";
 
+	/** Path for input directory. **/
+	private static final String INPUT_DIRECTORY = "input";
+
+	/** Path for output directory. **/
+	private static final String OUTPUT_DIRECTORY = "output";
+
+	/** Classname of the DIV that contains our testing dataset. **/
+	private static final String IO_CLASSNAME = "problem-io-wrapper";
+
+	/** Number of row used for dataset extraction. **/
+	private static final int DATASET_ROW = 2;
+
+	/** File extension for sample dataset. **/
+	private static final String TEST_EXTENSION = ".test";
+
 	/**
 	 * Prompts users for selecting a valid {@link Round}
 	 * instance that will be used as a contextual round.
+	 * If the given <tt>contest</tt> identifier is not null, then
+	 * it will be used for creating the round instance.
 	 * 
+	 * @param contest Contest identifier to use.
+	 * @param cookie Cookie value to use for retrieving given round.
 	 * @throws IOException If any error occurs while downloading contest page.
 	 * @throws GeneralSecurityException If any error occurs while creating HTTP client.
 	 */
-	private static Optional<Round> selectRound() throws IOException, GeneralSecurityException {
-		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.DEFAULT_HOSTNAME);
+	private static Optional<Round> selectRound(final String contest, final String cookie) throws IOException, GeneralSecurityException {
+		if (contest != null) {
+			return Optional.of(Round.fromIdentifier(contest, cookie));
+		}
+		out.println("[Round selection] Extracting contest list.");
+		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.getHostname());
 		final List<Contest> contests = Contest.get(executor);
 		final Scanner reader = new Scanner(System.in);
 		final Optional<Contest> selectedContest = select(contests, reader);
@@ -76,7 +106,7 @@ public final class ApplicationCommand {
 	 * @return Optional selected {@link NamedObject} instance.
 	 */
 	private static <T extends NamedObject> Optional<T> select(final List<T> objects, final Scanner reader) {
-		out.println("Please select a contest :");
+		out.println("[Round selection] Please select a contest :");
 		for (int i = 0; i < objects.size(); i++) {
 			final StringBuilder builder = new StringBuilder('\t');
 			builder.append(i + 1);
@@ -93,7 +123,10 @@ public final class ApplicationCommand {
 			}
 		}
 		catch (final NumberFormatException e) {
-			err.println("Number expected, abort");
+			err.println("-> Number expected, abort");
+			if (Application.isVerbose()) {
+				e.printStackTrace();
+			}
 		}
 		return Optional.empty();
 	}
@@ -102,23 +135,67 @@ public final class ApplicationCommand {
 	 * Creates and saves a contextual session.
 	 * 
 	 * @param cookie Cookie value to use for initialization.
+	 * @param contest Contest id to use. If <tt>null</tt> the contest selection menu will be shown.
 	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
 	 * @throws IOException If any error occurs while saving contextual session.
 	 * @throws GeneralSecurityException If any error occurs while creating session.
 	 */
-	private static boolean init(final String cookie) throws IOException, GeneralSecurityException {
-		out.println("Cookie retrieved, extracting contest list.");
-		final Optional<Round> round = selectRound();
+	private static CommandStatus init(final String cookie, final String contest) throws IOException, GeneralSecurityException {
+		out.println("[Initialization] Cookie retrieved");
+		final Optional<Round> round = selectRound(contest, cookie);
 		if (round.isPresent()) {
-			out.println("Writing " + COOKIE_PATH);
+			out.println("[Initialization] Writing " + COOKIE_PATH);
 			SerializationUtils.serialize(cookie, new FileOutputStream(COOKIE_PATH));
-			out.println("Writing " + ROUND_PATH);
+			out.println("[Initialization] Writing " + ROUND_PATH);
 			SerializationUtils.serialize(round.get(), new FileOutputStream(ROUND_PATH));
-			out.println("Initialization done, you can now download and submit in this directory.");
-			return true;
+			out.println("[Initialization] Creating input directory");
+			Files.createDirectories(Paths.get(INPUT_DIRECTORY));
+			out.println("[Initialization] Creating output directory");
+			Files.createDirectories(Paths.get(OUTPUT_DIRECTORY));
+			out.println("[Initialization] Generating sample dataset");
+			final CodeJamSession session = getContextualSession();
+			final List<Problem> problems = session
+					.getContestInfo()
+					.getProblems();
+			for (int i = 0; i < problems.size(); i++) {
+				extractDataset(problems.get(i), i);
+			}
+			out.println("[Initialization] Initialization done, you can now download and submit in this directory.");
+			return CommandStatus.SUCCESS;
 		}
-		err.println("No round selected, abort.");
-		return false;
+		err.println("-> No round selected, abort.");
+		return CommandStatus.FAILED;
+	}
+
+	/**
+	 * Extracts and creates sample dataset from the given <tt>problem</tt>.
+	 * 
+	 * @param problem Problem to create sample dataset for.
+	 * @throws IOException If any error occurs while creating sample dataset.
+	 */
+	private static void extractDataset(final Problem problem, final int id) throws IOException {
+		final Document document = (Document) Jsoup.parse(problem.getBody());
+		final Elements problemIO = document.getElementsByClass(IO_CLASSNAME);
+		if (!problemIO.isEmpty()) {
+			final Elements row = problemIO.first().getElementsByTag(HTMLConstant.TR);
+			if (row.size() >= DATASET_ROW) {
+				final Element dataset = row.get(1);
+				final Elements io = dataset.getElementsByTag(HTMLConstant.TD);
+				if (io.size() >= DATASET_ROW) {
+					final char problemIdentifier = (char)('A' + id);
+					final String path = new StringBuilder()
+						.append(problemIdentifier)
+						.append(TEST_EXTENSION)
+						.toString();
+					Files.write(
+							Paths.get(INPUT_DIRECTORY).resolve(path),
+							io.first().text().getBytes());
+					Files.write(
+							Paths.get(OUTPUT_DIRECTORY).resolve(path),
+							io.get(1).text().getBytes());
+				}
+			}
+		}
 	}
 
 	/**
@@ -126,43 +203,52 @@ public final class ApplicationCommand {
 	 * cookie instance and process initialization.
 	 * 
 	 * @param driverSupplier Driver supplier to use.
+	 * @param contest Contest identifier to use.
 	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
 	 */
-	private static boolean browserInit(final Supplier<WebDriver> driverSupplier) {
-		out.println("Web browser will open, please authenticate to your Google account with it.");
-		final SeleniumCookieSupplier supplier = new SeleniumCookieSupplier(Request.DEFAULT_HOSTNAME + "/codejam", FirefoxDriver::new);
+	private static CommandStatus browserInit(final Supplier<WebDriver> driverSupplier, final String contest) {
+		out.println("[Initialization] Web browser will open, please authenticate to your Google account with it.");
+		FirefoxDriverManager.getInstance().setup();
+		final SeleniumCookieSupplier supplier = new SeleniumCookieSupplier(Request.getHostname() + "/codejam", FirefoxDriver::new);
 		try {
 			final String cookie = supplier.get();
 			if (cookie == null) {
-				err.println("Retrieved cookie instance is null, abort.");
+				err.println("-> Retrieved cookie instance is null, abort.");
 			}
 			else {
-				return init(cookie);
+				return init(cookie, contest);
 			}
 		}
 		catch (final IOException | UnreachableBrowserException | GeneralSecurityException e) {
-			err.println("An error occurs while creating CodeJamSession : " + e.getMessage());
+			err.println("-> An error occurs while creating CodeJamSession");
+			if (Application.isVerbose()) {
+				e.printStackTrace();
+			}
 		}
-		return false;
+		return CommandStatus.FAILED;
 	}
 
 	/**
 	 * Initializes contextual session by asking user for SACSID cookie value.
 	 * 
+	 * @param contest Contest identifier to use.
 	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
 	 */
-	private static boolean textInit() {
+	private static CommandStatus textInit(final String contest) {
 		out.println("Please enter the SACSID cookie value to use :");
 		final Scanner scanner = new Scanner(System.in);
 		final String cookie = scanner.next();
 		scanner.close();
 		try {
-			return init(cookie);
+			return init(cookie, contest);
 		}
 		catch (final IOException | GeneralSecurityException e) {
-			err.println("An error occurs while creating CodeJamSession : " + e.getMessage());
+			err.println("-> An error occurs while creating CodeJamSession");
+			if (Application.isVerbose()) {
+				e.printStackTrace();
+			}
 		}
-		return false;
+		return CommandStatus.FAILED;
 	}
 
 	/**
@@ -171,19 +257,20 @@ public final class ApplicationCommand {
 	 * @param command Command to retrieve method parameters from.
 	 * @return <tt>true</tt> if the init command was correctly executed, <tt>false</tt> otherwise.
 	 */
-	public static boolean init(final CommandLine command) {
+	public static CommandStatus init(final CommandLine command) {
+		final String contest = command.getOptionValue(CONTEST);
 		if (command.hasOption(INIT_METHOD)) {
 			final String method = command.getOptionValue(INIT_METHOD).toLowerCase();
 			if (FIREFOX_METHOD.equals(method)) {
-				return browserInit(FirefoxDriver::new);
+				return browserInit(FirefoxDriver::new, contest);
 			}
 			else if (TEXT_METHOD.equals(method)) {
-				return textInit();
+				return textInit(contest);
 			}
-			err.println("Invalid method provided (only firefox or text supported");
-			return false;
+			err.println("-> Invalid method provided (only firefox or text supported");
+			return CommandStatus.INVALID_FORMAT;
 		}
-		return browserInit(FirefoxDriver::new);
+		return browserInit(FirefoxDriver::new, contest);
 	}
 
 	/**
@@ -199,7 +286,7 @@ public final class ApplicationCommand {
 		if (cookie == null) {
 			throw new IOException("Invalid cookie file, please initialize directory again.");
 		}
-		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.DEFAULT_HOSTNAME, cookie);
+		final HttpRequestExecutor executor = HttpRequestExecutor.create(Request.getHostname(), cookie);
 		final Round round = (Round) SerializationUtils.deserialize(new FileInputStream(ROUND_PATH));
 		if (round == null) {
 			throw new IOException("Contextual session is broken, please initialize directory again.");
@@ -217,19 +304,19 @@ public final class ApplicationCommand {
 	 */
 	private static ProblemInput getProblemInput(final CommandLine command, final CodeJamSession session) {
 		if (!command.hasOption(PROBLEM) || !command.hasOption(INPUT_TYPE)) {
-			err.println("Download command requires problem and input type parameters.");
+			err.println("-> Download command requires problem and input type parameters.");
 			return null;
 		}
 		final String problemArgument = command.getOptionValue(PROBLEM);
 		final String inputArgument = command.getOptionValue(INPUT_TYPE);
 		final Problem problem = session.getProblem(problemArgument);
 		if (problem == null) {
-			err.println("Problem " + problemArgument + " not found.");
+			err.println("-> Problem " + problemArgument + " not found.");
 			return null;
 		}
 		final ProblemInput input = problem.getProblemInput(inputArgument);
 		if (input == null) {
-			err.println("Input " + inputArgument + "not found for problem " + problemArgument + ".");
+			err.println("-> Input " + inputArgument + "not found for problem " + problemArgument + ".");
 			return null;
 		}
 		return input;
@@ -244,12 +331,12 @@ public final class ApplicationCommand {
 	 * @param command User command line.
 	 * @return <tt>true</tt> if the command was executed successfully, <tt>false</tt> otherwise.
 	 */
-	public static boolean download(final CommandLine command) {
+	public static CommandStatus download(final CommandLine command) {
 		try {
 			final CodeJamSession session = getContextualSession();
 			final ProblemInput input = getProblemInput(command, session);
 			if (input == null) {
-				return false;
+				return CommandStatus.INVALID_FORMAT;
 			}
 			final String rawAttempt = command.getOptionValue(DOWNLOAD_ATTEMPT);
 			final int attempt = (rawAttempt == null ? 0 : Integer.valueOf(rawAttempt));
@@ -260,9 +347,12 @@ public final class ApplicationCommand {
 			out.println(target.toString());
 		}
 		catch (final IOException | GeneralSecurityException e) {
-			err.println("An error occurs while downloading input file : " + e.getMessage());
+			err.println("-> An error occurs while downloading input file : " + e.getMessage());
+			if (Application.isVerbose()) {
+				e.printStackTrace();
+			}
 		}
-		return true;
+		return CommandStatus.FAILED;
 	}
 
 	/**
@@ -273,10 +363,10 @@ public final class ApplicationCommand {
 	 * @param command User command line.
 	 * @return <tt>true</tt> if the command was executed successfully, <tt>false</tt> otherwise.
 	 */
-	public static boolean submit(final CommandLine command) {
+	public static CommandStatus submit(final CommandLine command) {
 		if (!command.hasOption(OUTPUT) || !command.hasOption(SOURCE)) {
-			err.println("Submit command requires output and source file parameters.");
-			return false;
+			err.println("-> Submit command requires output and source file parameters.");
+			return CommandStatus.INVALID_FORMAT;
 		}
 		final String output = command.getOptionValue(OUTPUT);
 		final String source = command.getOptionValue(SOURCE);
@@ -285,16 +375,18 @@ public final class ApplicationCommand {
 			final ProblemInput input = getProblemInput(command, session);
 			final SubmitResponse response = session.submit(input, new File(output), new File(source));
 			if (response.isSuccess()) {
-				out.println("Submission correct !");				
+				out.println("Submission correct !");
+				return CommandStatus.SUCCESS;
 			}
-			else {
-				out.println("Submission failed : " + response.getMessage());
-			}
+			out.println("Submission failed : " + response.getMessage());
 		}
 		catch (final IOException | GeneralSecurityException e) {
 			err.println("An error occurs while submitting output file : " + e.getMessage());
+			if (Application.isVerbose()) {
+				e.printStackTrace();
+			}
 		}
-		return true;
+		return CommandStatus.FAILED;
 	}
 
 }
